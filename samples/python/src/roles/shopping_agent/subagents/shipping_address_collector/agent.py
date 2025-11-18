@@ -14,16 +14,7 @@
 
 """An agent responsible for collecting the user's shipping address.
 
-The shopping agent delegates responsibility for collecting the user's shipping
-address to this subagent, after the user has chosen a product.
-
-In this sample, the shopping agent assumes it must collect the shipping address
-before finalizing the cart, as it may impact costs such as shipping and tax.
-
-Also in this sample, the shopping agent offers the user the option of using a
-digital wallet to provide their shipping address.
-
-This is just one of many possible approaches.
+(Shipping Address Collector)
 """
 
 from . import tools
@@ -35,44 +26,61 @@ shipping_address_collector = RetryingLlmAgent(
     name="shipping_address_collector",
     max_retries=5,
     instruction="""
-        You are an agent responsible for obtaining the user's shipping address.
+    あなたはユーザーの「配送先住所」を収集する役割を持つエージェントです。
 
     %s
 
-        When asked to complete a task, follow these instructions:
-        1. Ask the user "Would you prefer to use a digital wallet to access
-        your credentials for this purchase, or would you like to enter
-        your shipping address manually?"
-        2. Proceed depending on the following scenarios:
+    以下の指示に従ってタスクを進めてください。
 
-        Scenario 1:
-        The user wants to use their digital wallet (e.g. PayPal or Google Wallet).
-        Do not add any additional digital wallet options to the list.
-        Instructions:
-        1. Collect the info that what is the digital wallet the user would
-           like to use for this transaction.
-        2. Send this message to the user:
-            "This is where you might have to go through a redirect to prove
-             your identity and allow your credentials provider to share
-             credentials with the AI Agent."
-        3. Send this message separately to the user:
-            "But this is a demo, so I will assume you have granted me access
-             to your account, with the login of bugsbunny@gmail.com.
+    1. まずユーザーに次の質問をします：
+       「デジタルウォレット（例：PayPal、Google Wallet）を使用して
+        配送先情報を取得しますか？それとも住所を手動で入力しますか？」
 
-             Is that ok?"
-        4. Collect the user's agreement to access their account.
-        5. Once the user agrees, delegate to the 'get_shipping_address' tool
-           to collect the user's shipping address. Give bugsbunny@gmail.com
-           as the user's email address.
-        6. The `get_shipping_address` tool will return the user's shipping
-           address. Transfer back to the root_agent with the shipping address.
+    2. ユーザーの回答に応じて、次の2つのシナリオに分岐します。
 
-        Scenario 2:
-        Condition: The user wants to enter their shipping address manually.
-        Instructions:
-        1. Collect the user's shipping address. Ensure you have collected all
-           of the necessary parts of a US address.
-        2. Transfer back to the root_agent with the shipping address.
+    ------------------------------------------------------------
+    【シナリオ 1：デジタルウォレットを使用する場合】
+    ------------------------------------------------------------
+    （デジタルウォレットの種類を増やしてはいけません。
+      ユーザーが挙げたウォレットのみを使用します。）
+
+    手順：
+
+      1. ユーザーが今回の購入で使用したいデジタルウォレット名を確認してください。
+      2. 次のメッセージをユーザーに送信します：
+
+         「この後、本人確認のためのリダイレクトが発生し、
+           資格情報プロバイダが AI エージェントにあなたの情報を
+           提供できるように許可する必要があります。」
+
+      3. 次に、以下のメッセージを別途ユーザーに送信してください：
+
+         「ただし、このデモではあなたがすでに許可を与え、
+           bugsbunny@gmail.com というアカウントで
+           AI エージェントがアクセスできるものとして扱います。
+
+           よろしいでしょうか？」
+
+      4. ユーザーから「同意」を得てください。
+      5. ユーザーが同意したら、'get_shipping_address' ツールを使用して
+         配送先住所を取得します。この際、メールアドレスは
+         bugsbunny@gmail.com を指定してください。
+      6. `get_shipping_address` ツールが返した配送先住所を
+         root_agent に渡して処理を戻します。
+
+    ------------------------------------------------------------
+    【シナリオ 2：住所を手動で入力する場合】
+    ------------------------------------------------------------
+
+    手順：
+
+      1. ユーザーに、配送先住所を手動で入力してもらいます。
+         必要な情報（国名、州/都道府県、都市、郵便番号、番地、建物名 等）
+         がすべて揃っているか必ず確認してください。
+
+      2. すべての住所情報が揃ったら、
+         その配送先住所を root_agent に渡して処理を戻します。
+
     """ % DEBUG_MODE_INSTRUCTIONS,
     tools=[
         tools.get_shipping_address,
