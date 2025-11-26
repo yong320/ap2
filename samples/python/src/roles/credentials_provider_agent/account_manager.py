@@ -20,81 +20,105 @@ For demonstration purposes, several accounts are pre-populated with sample data.
 
 from typing import Any
 
-
 _account_db = {
-    "bugsbunny@gmail.com": {
+    "taro.yamada@gmail.com": {
         "shipping_address": {
-            "recipient": "Bugs Bunny",
-            "organization": "Sample Organization",
-            "address_line": ["123 Main St"],
-            "city": "Sample City",
-            "region": "ST",
-            "postal_code": "00000",
-            "country": "US",
-            "phone_number": "+1-000-000-0000",
+            "recipient": "山田 太郎",
+            "organization": "ヤマダ商事",
+            "address_line": ["東京都新宿区西新宿2-8-1"],
+            "city": "新宿区",
+            "region": "東京都",
+            "postal_code": "160-0023",
+            "country": "JP",
+            "phone_number": "+81-090-1234-5678",
         },
         "payment_methods": {
             "card1": {
                 "type": "CARD",
-                "alias": "American Express ending in 4444",
-                "network": [{"name": "amex", "formats": ["DPAN"]}],
-                "cryptogram": "fake_cryptogram_abc123",
-                "token": "1111000000000000",
-                "card_holder_name": "John Doe",
-                "card_expiration": "12/2025",
+                "alias": "Visa（末尾 1234）",
+                "network": [{"name": "visa", "formats": ["DPAN"]}],
+                "cryptogram": "fake_cryptogram_jp_visa_123",
+                "token": "4111111111111234",
+                "card_holder_name": "Taro Yamada",
+                "card_expiration": "11/2027",
                 "card_billing_address": {
-                    "country": "US",
-                    "postal_code": "00000",
+                    "country": "JP",
+                    "postal_code": "160-0023",
                 },
             },
             "card2": {
                 "type": "CARD",
-                "alias": "American Express ending in 8888",
-                "network": [{"name": "amex", "formats": ["DPAN"]}],
-                "cryptogram": "fake_cryptogram_ghi789",
-                "token": "2222000000000000",
-                "card_holder_name": "Bugs Bunny",
-                "card_expiration": "10/2027",
+                "alias": "Mastercard（末尾 5678）",
+                "network": [{"name": "mastercard", "formats": ["DPAN"]}],
+                "cryptogram": "fake_cryptogram_jp_mc_456",
+                "token": "5555555555555678",
+                "card_holder_name": "Taro Yamada",
+                "card_expiration": "03/2026",
                 "card_billing_address": {
-                    "country": "US",
-                    "postal_code": "00000",
+                    "country": "JP",
+                    "postal_code": "160-0023",
                 },
             },
-            "bank_account1": {
-                "type": "BANK_ACCOUNT",
-                "account_number": "111",
-                "alias": "Primary bank account",
-            },
             "digital_wallet1": {
                 "type": "DIGITAL_WALLET",
                 "brand": "PayPal",
-                "account_identifier": "foo@bar.com",
-                "alias": "Bugs's PayPal account",
+                "account_identifier": "taro.paypal@gmail.com",
+                "alias": "山田さんのPayPal",
+            },
+            "digital_wallet2": {
+                "type": "DIGITAL_WALLET",
+                "brand": "LINE Pay",
+                "account_identifier": "taro.line@gmail.com",
+                "alias": "LINE Payアカウント",
             },
         },
     },
-    "daffyduck@gmail.com": {
+
+    "hanako.suzuki@example.com": {
+        "shipping_address": {
+            "recipient": "鈴木 花子",
+            "organization": "",
+            "address_line": ["大阪府大阪市北区梅田3-1-1"],
+            "city": "大阪市",
+            "region": "大阪府",
+            "postal_code": "530-0001",
+            "country": "JP",
+            "phone_number": "+81-80-9876-5432",
+        },
+        "payment_methods": {
+            "card1": {
+                "type": "CARD",
+                "alias": "JCB（末尾 9012）",
+                "network": [{"name": "jcb", "formats": ["DPAN"]}],
+                "cryptogram": "fake_cryptogram_jcb_789",
+                "token": "3530111333309012",
+                "card_holder_name": "Hanako Suzuki",
+                "card_expiration": "07/2028",
+                "card_billing_address": {
+                    "country": "JP",
+                    "postal_code": "530-0001",
+                },
+            },
+            "digital_wallet1": {
+                "type": "DIGITAL_WALLET",
+                "brand": "Rakuten Pay",
+                "account_identifier": "hanako.rpay@example.com",
+                "alias": "楽天ペイ",
+            },
+        },
+    },
+
+    "kenji.tanaka@example.com": {
         "payment_methods": {
             "bank_account1": {
                 "type": "BANK_ACCOUNT",
-                "brand": "Bank of Money",
-                "account_number": "789",
-                "alias": "Main checking account",
-            }
-        },
-    },
-    "elmerfudd@gmail.com": {
-        "payment_methods": {
-            "digital_wallet1": {
-                "type": "DIGITAL_WALLET",
-                "brand": "PayPal",
-                "account_identifier": "elmerfudd@gmail.com",
-                "alias": "Fudd's PayPal",
-            }
+                "brand": "三井住友銀行",
+                "account_number": "1234567",
+                "alias": "メイン普通預金口座",
+            },
         }
     },
 }
-
 
 _token = {}
 

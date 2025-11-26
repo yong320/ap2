@@ -56,7 +56,7 @@ shipping_address_collector = RetryingLlmAgent(
       3. 次に、以下のメッセージを別途ユーザーに送信してください：
 
          「ただし、このデモではあなたがすでに許可を与え、
-           bugsbunny@gmail.com というアカウントで
+         taro.yamada@gmail.com というアカウントで
            AI エージェントがアクセスできるものとして扱います。
 
            よろしいでしょうか？」
@@ -64,7 +64,7 @@ shipping_address_collector = RetryingLlmAgent(
       4. ユーザーから「同意」を得てください。
       5. ユーザーが同意したら、'get_shipping_address' ツールを使用して
          配送先住所を取得します。この際、メールアドレスは
-         bugsbunny@gmail.com を指定してください。
+        taro.yamada@gmail.com を指定してください。
       6. `get_shipping_address` ツールが返した配送先住所を
          root_agent に渡して処理を戻します。
 

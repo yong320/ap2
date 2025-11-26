@@ -139,3 +139,4 @@ def _collect_risk_data(tool_context: ToolContext) -> dict:
   risk_data = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...fake_risk_data"
   tool_context.state["risk_data"] = risk_data
   return risk_data
+

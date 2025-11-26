@@ -106,21 +106,22 @@ def _infer_product_features(item: PaymentItem, item_count: int) -> dict[str, str
   The result is stored into CartContents.product_features so that the shopping
   agent can later compare items like:
     - 価格レベル（高・中・低）
-    - 吸水性（高・中・低）
-    - 横漏れしやすさ など
+    - 吸水性（高・中・普通・非常に高い など）
+    - 横漏れしやすさ（横漏れしにくい・標準的）
   """
   # 基本はラベルのテキストから簡単に推論する
   label = getattr(item, "label", "") or ""
   label_lower = label.lower()
 
-  # 価格レベル：ここではサンプルとして item_count ベースで決める
-  # （必要であれば金額から算出するように拡張可能）
-  if item_count == 2:
-    price_level = "低"
-  elif item_count == 3:
-    price_level = "やや高"
-  else:
+  # 価格レベル：
+  # ここではサンプルとして item_count ベースで簡単に決める。
+  # 必要であれば金額から算出するロジックに差し替え可能。
+  if item_count == 1:
     price_level = "中"
+  elif item_count == 2:
+    price_level = "低"
+  else:
+    price_level = "高"
 
   # 吸水性
   if "超吸水" in label or "超吸収" in label or "プレミアム" in label or "premium" in label_lower:
@@ -136,22 +137,11 @@ def _infer_product_features(item: PaymentItem, item_count: int) -> dict[str, str
   else:
     leak = "標準的"
 
-  # 肌触りなど（あくまで比較用の簡単な属性）
-  if "プレミアム" in label or "やわらか" in label:
-    softness = "やわらかい"
-  else:
-    softness = "標準"
-
+  # ここでは 3 つのシンプルな属性だけを返す
   return {
-      "price_level": price_level,            # 例: "低", "中", "やや高"
-      "absorbency": absorbency,             # 例: "普通", "高い", "非常に高い"
-      "leak_protection": leak,              # 例: "横漏れしにくい"
-      "softness": softness,                 # 例: "やわらかい"
-      # shopping agent が日本語でそのまま表示しても使いやすいよう、
-      # 一文コメントも入れておく
-      "summary_ja": (
-          f"価格は{price_level}、吸水性は{absorbency}、{leak}、肌触りは{softness}"
-      ),
+      "price_level": price_level,        # 例: "低", "中", "高"
+      "absorbency": absorbency,         # 例: "普通", "高い", "非常に高い"
+      "leak_protection": leak,          # 例: "横漏れしにくい", "標準的"
   }
 
 
@@ -174,19 +164,20 @@ async def _create_and_add_cart_mandate_artifact(
   """Creates a CartMandate and adds it as an artifact.
 
   In addition to the main item, this also adds a second PaymentItem to
-  `display_items` that encodes product features such as absorbency and
-  manufacturer, so that other agents can easily read and compare them.
+  `display_items` that encodes product features such as price level,
+  absorbency and leak protection, so that other agents can easily read
+  and compare them.
   """
-  # 先推论商品特征（吸水性、価格レベルなど）
+  # 先推論商品特征（価格レベル・吸水性・横漏れしやすさ など）
   merchant_name = _get_merchant_name_for_item(item_count)
   product_features = _infer_product_features(item, item_count)
 
   # 特征字符串（写在第二个 display_item 的 label 里）
-  # 例）「特徴: 吸水性=高い / 横漏れ=横漏れしにくい / メーカー=B社」
+  # 例）「特徴: 価格=中 / 吸水性=高い / 横漏れ=横漏れしにくい」
   features_label = (
-      f"特徴: 吸水性={product_features['absorbency']} / "
-      f"横漏れ={product_features['leak_protection']} / "
-      f"メーカー={merchant_name}"
+      f"特徴: 価格={product_features['price_level']} / "
+      f"吸水性={product_features['absorbency']} / "
+      f"横漏れ={product_features['leak_protection']}"
   )
 
   # 为了不影响合计金额，特征项金额设为 0，currency 延用原金额
@@ -202,7 +193,7 @@ async def _create_and_add_cart_mandate_artifact(
           PaymentMethodData(
               supported_methods="CARD",
               data={
-                  "network": ["mastercard", "paypal", "amex"],
+                  "network": ["visa", "mastercard", "paypal", "amex"],
               },
           )
       ],
@@ -224,6 +215,8 @@ async def _create_and_add_cart_mandate_artifact(
       payment_request=payment_request,
       cart_expiry=(current_time + timedelta(minutes=30)).isoformat(),
       merchant_name=merchant_name,
+      # 如果 CartContents 有 product_features 字段，也可以在这里挂上：
+      # product_features=product_features,
   )
 
   cart_mandate = CartMandate(contents=cart_contents)
@@ -234,7 +227,6 @@ async def _create_and_add_cart_mandate_artifact(
           root=DataPart(data={CART_MANDATE_DATA_KEY: cart_mandate.model_dump()})
       )
   ])
-
 
 
 def _collect_risk_data(updater: TaskUpdater) -> dict:

@@ -40,8 +40,9 @@ class PaymentProcessorExecutor(BaseServerExecutor):
   """AgentExecutor for the merchant payment processor agent."""
 
   _system_prompt = """
-    You are a payment processor agent. Your role is to process payments
-    on behalf of a merchant.
+    あなたは決済処理エージェントです。
+    あなたの役割は、販売事業者（マーチャント）に代わって支払い処理を行うことです。
+
 
     %s
   """ % DEBUG_MODE_INSTRUCTIONS

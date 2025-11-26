@@ -50,11 +50,7 @@ payment_method_collector = RetryingLlmAgent(
            - 税金（Tax）：金額がある場合は表示
            - 合計（Total）：payment_request.details.total の金額
              （通貨記号付き・3桁区切りで表示）
-      ・有効期限（Expires）：
-           cart_expiry をユーザーのタイムゾーンに変換し、
-           「◯時間後」「明日の◯時まで」など自然な日本語に変換
-      ・返品期間（Refund Period）：
-           refund_period があれば「◯日」形式でわかりやすく表示
+    
 
     【b. 配送先住所（Shipping Address）】
       ・先ほど収集した配送先住所を、読みやすい形式で表示
@@ -67,9 +63,10 @@ payment_method_collector = RetryingLlmAgent(
     ------------------------------------------------------------
 
         例）
+        利用可能な決済方法は以下の通りです。
         1. Visa（**** 1234）
         2. Mastercard（**** 4421）
-        3. PayPal アカウント
+        3. paypalアカウント
 
     ------------------------------------------------------------
     4. ユーザーに、どの決済方法を使用するか番号で選択してもらいます。

@@ -104,11 +104,11 @@ async def update_cart(
     tax_and_shipping_costs = [
         PaymentItem(
             label="Shipping",
-            amount=PaymentCurrencyAmount(currency="USD", value=2.00),
+            amount=PaymentCurrencyAmount(currency="JPY", value=400),
         ),
         PaymentItem(
             label="Tax",
-            amount=PaymentCurrencyAmount(currency="USD", value=1.50),
+            amount=PaymentCurrencyAmount(currency="JPY", value=350),
         ),
     ]
 

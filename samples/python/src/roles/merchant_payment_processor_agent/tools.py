@@ -117,10 +117,11 @@ async def _raise_challenge(
   challenge_data = {
       "type": "otp",
       "display_text": (
-          "The payment method issuer sent a verification code to the phone "
-          "number on file, please enter it below. It will be shared with the "
-          "issuer so they can authorize the transaction."
-          "(Demo only hint: the code is 123)"
+          "支払い方法の発行者が、登録されている電話番号宛てに認証コードを送信しました。"
+          "取引を承認するため、コードを発行者と共有する必要がありますので、"
+          "以下に入力してください。"
+          "（デモ用ヒント：コードは 123 です）"
+
       ),
   }
   text_part = TextPart(
