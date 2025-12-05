@@ -33,44 +33,41 @@ shipping_address_collector = RetryingLlmAgent(
     以下の指示に従ってタスクを進めてください。
 
     1. まずユーザーに次の質問をします：
-       「デジタルウォレット（例：PayPal、Google Wallet）を使用して
-        配送先情報を取得しますか？それとも住所を手動で入力しますか？」
-
+       "デジタルウォレット（例：PayPal、Google Wallet）を使用して
+        配送先情報を取得しますか？それとも住所を手動で入力しますか？"
     2. ユーザーの回答に応じて、次の2つのシナリオに分岐します。
 
-    ------------------------------------------------------------
-    【シナリオ 1：デジタルウォレットを使用する場合】
-    ------------------------------------------------------------
-    （デジタルウォレットの種類を増やしてはいけません。
-      ユーザーが挙げたウォレットのみを使用します。）
+    シナリオ 1：デジタルウォレットを使用する場合
+
 
     手順：
 
       1. ユーザーが今回の購入で使用したいデジタルウォレット名を確認してください。
       2. 次のメッセージをユーザーに送信します：
 
-         「この後、本人確認のためのリダイレクトが発生し、
+         "この後、本人確認のためのリダイレクトが発生し、
            資格情報プロバイダが AI エージェントにあなたの情報を
-           提供できるように許可する必要があります。」
+           提供できるように許可する必要があります。"
+      3. 次に、必ず以下のメッセージをユーザーに送信してください（文言は変えないこと）。
 
-      3. 次に、以下のメッセージを別途ユーザーに送信してください：
+         "ただし、このデモではあなたがすでに許可を与え、taroyamada@gmail.comというアカウントで
+         AI エージェントがアクセスできるものとして扱います。よろしいでしょうか？"
+      4. Collect the user's agreement to access their account.
+      5. Once the user agrees, delegate to the 'get_shipping_address' tool
+           to collect the user's shipping address. Give taroyamada@gmail.com
+           as the user's email address.
+      6. The `get_shipping_address` tool will return the user's shipping
+           address. Transfer back to the root_agent with the shipping address.
+         IMPORTANT:
+          - Do NOT display the returned shipping address (JSON, name, phone number, postal code,
+            or any personal information) to the user.
+          - The shipping address must be passed internally to the root_agent only.
+          - Never output the raw address data to the user interface.
 
-         「ただし、このデモではあなたがすでに許可を与え、
-         taro.yamada@gmail.com というアカウントで
-           AI エージェントがアクセスできるものとして扱います。
 
-           よろしいでしょうか？」
 
-      4. ユーザーから「同意」を得てください。
-      5. ユーザーが同意したら、'get_shipping_address' ツールを使用して
-         配送先住所を取得します。この際、メールアドレスは
-        taro.yamada@gmail.com を指定してください。
-      6. `get_shipping_address` ツールが返した配送先住所を
-         root_agent に渡して処理を戻します。
-
-    ------------------------------------------------------------
     【シナリオ 2：住所を手動で入力する場合】
-    ------------------------------------------------------------
+
 
     手順：
 

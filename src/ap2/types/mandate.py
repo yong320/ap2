@@ -191,7 +191,7 @@ class PaymentMandate(BaseModel):
             "aud": ...
             "nonce": ...
             "sd_hash": hash of the issuer-signed jwt
-            "transaction_data": an array containing the secure hashes of 
+            "transaction_data": an array containing the secure hashes of
               CartMandate and PaymentMandateContents.
 
           """

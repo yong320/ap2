@@ -17,11 +17,10 @@
 Each 'account' contains a user's payment methods and shipping address.
 For demonstration purposes, several accounts are pre-populated with sample data.
 """
-
 from typing import Any
 
 _account_db = {
-    "taro.yamada@gmail.com": {
+    "taroyamada@gmail.com": {
         "shipping_address": {
             "recipient": "山田 太郎",
             "organization": "ヤマダ商事",
@@ -108,16 +107,7 @@ _account_db = {
         },
     },
 
-    "kenji.tanaka@example.com": {
-        "payment_methods": {
-            "bank_account1": {
-                "type": "BANK_ACCOUNT",
-                "brand": "三井住友銀行",
-                "account_number": "1234567",
-                "alias": "メイン普通預金口座",
-            },
-        }
-    },
+
 }
 
 _token = {}

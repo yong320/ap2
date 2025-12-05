@@ -85,7 +85,7 @@ async def find_items_workflow(
     for item in items:
       item_count += 1
       await _create_and_add_cart_mandate_artifact(
-          item, item_count, current_time, updater
+          item, item_count, current_time, updater,intent
       )
     risk_data = _collect_risk_data(updater)
     updater.add_artifact([
@@ -160,34 +160,64 @@ async def _create_and_add_cart_mandate_artifact(
     item_count: int,
     current_time: datetime,
     updater: TaskUpdater,
+    intent: str | None = None,  # 新增参数，默认为 None，保持兼容
 ) -> None:
   """Creates a CartMandate and adds it as an artifact.
 
-  In addition to the main item, this also adds a second PaymentItem to
-  `display_items` that encodes product features such as price level,
-  absorbency and leak protection, so that other agents can easily read
-  and compare them.
+  In addition to the main item, this also adds PaymentItems to `display_items`
+  that encode product features and a debug-style dialogue between the shopping
+  agent and this merchant agent.
   """
   # 先推論商品特征（価格レベル・吸水性・横漏れしやすさ など）
   merchant_name = _get_merchant_name_for_item(item_count)
   product_features = _infer_product_features(item, item_count)
 
-  # 特征字符串（写在第二个 display_item 的 label 里）
-  # 例）「特徴: 価格=中 / 吸水性=高い / 横漏れ=横漏れしにくい」
+  # 1) 特征字符串（第二个 display_item 的 label）
   features_label = (
       f"特徴: 価格={product_features['price_level']} / "
       f"吸水性={product_features['absorbency']} / "
       f"横漏れ={product_features['leak_protection']}"
   )
 
-  # 为了不影响合计金额，特征项金额设为 0，currency 延用原金额
-  feature_amount = item.amount.model_copy(update={"value": 0})
+  # 为了不影响合计金额，追加条目金额都设为 0，currency 延用原金额
+  zero_amount = item.amount.model_copy(update={"value": 0})
 
   feature_item = PaymentItem(
       label=features_label,
-      amount=feature_amount,
+      amount=zero_amount,
   )
 
+  # 2) ★ 真实的 agent 对话内容（第三个 display_item 的 label）
+  if intent:
+    # 有具体 intent 时，完整展示 shopping ↔ merchant 的一问一答
+    dialogue_label = (
+        "shopping agent: "
+        f"ユーザーから「{intent}」というインテントを受け取りました。"
+        f"{merchant_name}さん、この条件に合う商品を提案してください。\n"
+        f"{merchant_name}のmerchant agent: "
+        "インテントの内容に基づき自社カタログを確認しました。その結果、"
+        f"『{item.label}』が最も適していると判断しました。"
+        f" (価格レベル={product_features['price_level']}・"
+        f"吸水性={product_features['absorbency']}・"
+        f"横漏れしにくさ={product_features['leak_protection']})"
+    )
+  else:
+    # 理论上很少走到这里：没有 intent 时就写一个泛化版
+    dialogue_label = (
+        f"{merchant_name}のmerchant agentからの提案: "
+        f"shopping agentの依頼内容を踏まえ、"
+        f"『{item.label}』をおすすめします。"
+        f" (価格レベル={product_features['price_level']}・"
+        f"吸水性={product_features['absorbency']}・"
+        f"横漏れしにくさ={product_features['leak_protection']})"
+    )
+
+  dialogue_item = PaymentItem(
+      label=dialogue_label,
+      amount=zero_amount,
+  )
+
+  # 3) PaymentRequest：主商品 + 特征说明 + 对话说明
   payment_request = PaymentRequest(
       method_data=[
           PaymentMethodData(
@@ -199,11 +229,10 @@ async def _create_and_add_cart_mandate_artifact(
       ],
       details=PaymentDetailsInit(
           id=f"order_{item_count}",
-          # 主商品 + 特征条目
-          display_items=[item, feature_item],
+          display_items=[item, feature_item, dialogue_item],
           total=PaymentItem(
               label="Total",
-              amount=item.amount,
+              amount=item.amount,  # 总价仍然只算主商品
           ),
       ),
       options=PaymentOptions(request_shipping=True),
@@ -215,8 +244,6 @@ async def _create_and_add_cart_mandate_artifact(
       payment_request=payment_request,
       cart_expiry=(current_time + timedelta(minutes=30)).isoformat(),
       merchant_name=merchant_name,
-      # 如果 CartContents 有 product_features 字段，也可以在这里挂上：
-      # product_features=product_features,
   )
 
   cart_mandate = CartMandate(contents=cart_contents)
